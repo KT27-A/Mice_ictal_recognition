@@ -22,3 +22,5 @@ For training
 2. Placing generated training/testing list to dataset/mice_labels
 3. Using extract_frames.py to transform videos to frames
 4. Using command in comment.txt for training
+
+![grab-landing-page](https://github.com/Katou2/Mice_ictal_recognition/blob/master/demo.gif)
