@@ -3,11 +3,11 @@ Recognizing mice ictal
 
 For real-time application
 1. Download models from URL
-https://drive.google.com/file/d/1Cag9Zr0HvJzWRy839qgaBAMmj1b-TdcX/view?usp=sharing, https://drive.google.com/file/d/1FWG4-rsIb9lKEoF4SGKNXDnedleCuUH5/view?usp=sharing
+https://drive.google.com/file/d/11LcXG6e9mM_TbeN8iY1CJVlokP8xX9lo/view?usp=sharing,%20https://drive.google.com/file/d/1Cag9Zr0HvJzWRy839qgaBAMmj1b-TdcX/view?usp=sharing
 
 2. Place the models in the right path \
 RGB_Kinetics_64f -> ../pretrained_model \
-save_71_max.pth -> ./results_mice_resnext101
+model_mice.pth -> ./results_mice_resnext101
 
 Using command in comment.txt 
 ```
