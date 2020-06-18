@@ -3,10 +3,11 @@ Recognizing mice ictal
 
 For real-time application
 1. Download models from URL
-https://portland-my.sharepoint.com/personal/yzhang2383-c_ad_cityu_edu_hk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fyzhang2383%2Dc%5Fad%5Fcityu%5Fedu%5Fhk%2FDocuments%2Ftrained%5Fmodel&originalPath=aHR0cHM6Ly9wb3J0bGFuZC1teS5zaGFyZXBvaW50LmNvbS86ZjovZy9wZXJzb25hbC95emhhbmcyMzgzLWNfYWRfY2l0eXVfZWR1X2hrL0VsTXk2eUtpTWFwRXZFamRNWUFjVkNZQkc0ZW1GMDFxR2NnT2w5UDh2Y3hITVE_cnRpbWU9cEVVaGlhRVAyRWc
-2. Place the models in the right place
-RGB_Kinetics_64f -> ../pretrained_model
-save_71_max.pth -> ./results_mice_resnext101
+https://drive.google.com/file/d/11LcXG6e9mM_TbeN8iY1CJVlokP8xX9lo/view?usp=sharing,%20https://drive.google.com/file/d/1Cag9Zr0HvJzWRy839qgaBAMmj1b-TdcX/view?usp=sharing
+
+2. Place the models in the right path \
+RGB_Kinetics_64f -> ../pretrained_model \
+model_mice.pth -> ./results_mice_resnext101
 
 Using command in comment.txt 
 ```
@@ -22,3 +23,5 @@ For training
 2. Placing generated training/testing list to dataset/mice_labels
 3. Using extract_frames.py to transform videos to frames
 4. Using command in comment.txt for training
+
+![grab-landing-page](https://github.com/Katou2/Mice_ictal_recognition/blob/master/demo.gif)
