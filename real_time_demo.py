@@ -56,7 +56,6 @@ def main():
             # our frames list
             frame = imutils.resize(frame, height=112)
             frames.append(frame)
-
         # now that our frames array is filled we can construct our blob
         blob = cv2.dnn.blobFromImages(frames, 1.0,
             (opts.sample_size, opts.sample_size), (114.7748, 107.7354, 99.4750),

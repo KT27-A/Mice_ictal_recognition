@@ -46,14 +46,6 @@ if __name__=="__main__":
     model, parameters = generate_model(opts)
     
     criterion = nn.CrossEntropyLoss().cuda()
-
-    if opts.resume_path1:
-        print('loading checkpoint {}'.format(opts.resume_path1))
-        checkpoint = torch.load(opts.resume_path1)
-        
-        assert opts.arch == checkpoint['arch']
-        opts.begin_epoch = checkpoint['epoch']
-        model.load_state_dict(checkpoint['state_dict'])
     
     log_path = os.path.join(opts.result_path, opts.dataset)
     if not os.path.exists(log_path):

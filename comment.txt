@@ -1,3 +1,13 @@
+-------------------------------train_single_resnext101_scratch------------------------------------
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset MICE --modality RGB --split 1 --only_RGB \
+--n_classes 400 --n_finetune_classes 2 \
+--batch_size 32 --log 1 --sample_duration 64 \
+--model resnext --model_depth 101 --ft_begin_index 0 \
+--frame_dir "../mice-1f" \
+--annotation_path "dataset/mice_labels" \
+--result_path "results_mice_resnext101/" \
+--n_workers 0 --n_epochs 100
+
 -------------------------------train_single_resnext101_mice------------------------------------
 CUDA_VISIBLE_DEVICES=0 python train.py --dataset MICE --modality RGB --split 1 --only_RGB \
 --n_classes 400 --n_finetune_classes 2 \
@@ -20,11 +30,21 @@ python test_plus_mice.py --batch_size 1 --n_classes 2 --model resnext --model_de
 --n_workers 0 --test_file 'test_mice_new.txt'
 
 
+-------------------------------test_single_resnext101_mice_online------------------------------------
+python test_plus_mice_online.py --batch_size 1 --n_classes 2 --model resnext --model_depth 101 \
+--log 1 --dataset MICE_online --modality RGB --sample_duration 64 --split 1 --only_RGB  \
+--resume_path1 "results_mice_resnext101_5/save_5_max.pth" \
+--frame_dir "/home/katou2/github_home/0609_epilepsy/mice" \
+--annotation_path "dataset/mice_labels" \
+--result_path "results_mice_resnext101/" \
+--n_workers 0 --test_file 'test_mice_case.txt'
+
+
 -------------------------------real_time_resnext101_mice------------------------------------
 python real_time_demo.py --n_classes 2 --model resnext --model_depth 101 \
 --sample_duration 64 --annotation_path "dataset/mice_labels" \
---resume_path1 "results_mice_resnext101/save_71_max.pth" \
---inputs "../0609_epilepsy/mice/pre_control/2020-03-18_07_02_1.mp4" \
+--resume_path1 "results_mice_resnext101_5/save_5_max.pth" \
+--inputs "./07_51-52.mp4" \
 
 
 
