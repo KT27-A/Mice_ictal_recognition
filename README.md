@@ -24,4 +24,17 @@ For training
 3. Using extract_frames.py to transform videos to frames
 4. Using command in comment.txt for training
 
+For testing online (.mp4 file)
+
+Using command in comment.txt
+
+python test_plus_mice_online.py --batch_size 1 --n_classes 2 --model resnext --model_depth 101 \
+--log 1 --dataset MICE_online --modality RGB --sample_duration 64 --split 1 --only_RGB  \
+--resume_path1 "results_mice_resnext101/model_mice.pth" \
+--frame_dir "/home/katou2/github_home/0609_epilepsy/mice" \
+--annotation_path "dataset/mice_labels" \
+--result_path "results_mice_resnext101/" \
+--n_workers 0 --test_file 'test_mice.txt'
+
+
 ![grab-landing-page](https://github.com/Katou2/Mice_ictal_recognition/blob/master/demo.gif)
