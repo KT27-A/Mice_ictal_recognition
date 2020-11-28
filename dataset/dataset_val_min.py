@@ -12,11 +12,61 @@ import cv2
 import imutils
 from torch.utils.data import DataLoader
 from prefetch_generator import BackgroundGenerator
+from models.experimental import attempt_load
+from detection.detect import detect
+import sys
+sys.path.insert(0, '/home/alien/zhangyujia/0613_mice_ictal_recognition/detection')
 
-class DataLoaderX(DataLoader):
+weights = '/home/alien/zhangyujia/0613_mice_ictal_recognition/detection/best.pt'
+device = 'cuda:0'
+# device = 'cpu'
+detect_model = attempt_load(weights, map_location=device)
+if device != 'cpu':
+    detect_model = detect_model.half()
 
-    def __iter__(self):
-        return BackgroundGenerator(super().__iter__())
+def center_crop(clip, model, sample_size=112):
+    res = []
+    # out = imageio.get_writer(save_path, fps=10)
+    for i in range(len(clip)):
+        if i % 64 == 0:
+            if i + 64 > len(clip):
+                x_center, _ = detect(clip[i], model)
+            else:
+                first_x_center, _ = detect(clip[i], model)
+                mid_x_center, _ = detect(clip[i+31], model)
+                end_x_center, _ = detect(clip[i+63], model)
+                x_center = int((first_x_center + mid_x_center + end_x_center)/3)
+            frame_height, frame_width, _ = clip[i].shape
+            if not x_center:
+                x_center = int(frame_width / 2)
+            # x_start = x_center - int(sample_size/2)
+            # x_end = x_center + int(sample_size/2)
+            # fix = 30
+            # if x_start < fix:
+            #     x_start = fix
+            #     x_end = fix + sample_size
+                
+            # if x_end > frame_width - fix:
+            #     x_start = frame_width - sample_size - fix
+            #     x_end = frame_width - fix
+            if x_center < 44:
+                x_start = 0
+                x_end = 112
+            elif x_center < 156:
+                x_start = 43
+                x_end = 155
+            else:
+                x_start = 87
+                x_end = 199
+
+        # res.append(np.transpose(clip[i][:, x_start:x_end, :] - [114.7748, 107.7354, 99.4750], [2, 1, 0]))
+        cropped_clip = clip[i][:, x_start:x_end, :]
+        # out.append_data(cropped_clip)
+        res.append(np.transpose(cropped_clip - [114.7748, 107.7354, 99.4750], [2, 0, 1]))
+        # res.append(np.transpose(cropped_clip - [99.4750, 107.7354, 114.7748], [2, 0, 1]))
+        # res.append(np.transpose(cropped_clip - [0, 0, 0], [2, 0, 1]))
+    return res
+
 
 def get_test_video_online(opt, video_path):
     """
@@ -38,6 +88,7 @@ def get_test_video_online(opt, video_path):
                 (grabbed, frame) = cap.read()
                 if grabbed:
                     frame = imutils.resize(frame, height=opt.sample_size)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     clip.append(frame)
                 else:
                     cap.set(1, 0) # set the starting frame index 0
@@ -46,24 +97,42 @@ def get_test_video_online(opt, video_path):
                 (grabbed, frame) = cap.read()
                 if grabbed:
                     frame = imutils.resize(frame, height=opt.sample_size)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     clip.append(frame)
+    
+    # pro_clip = center_crop(clip, detect_model)
+    # # for i, crop in enumerate(pro_clip):
+    # #     img = crop.transpose(1, 2, 0).astype(np.uint8)
+    # #     cv2.imshow('img', clip[i])
+    # #     cv2.imshow('img_2', img)
+    # #     cv2.waitKey(0)
+
+    # pro_clip = np.transpose(pro_clip, (1, 0, 2, 3))
 
     
     pro_clip = cv2.dnn.blobFromImages(clip, 1.0,
                 (opt.sample_size, opt.sample_size), (114.7748, 107.7354, 99.4750),
                         swapRB=True, crop=True)
-            # (opt.sample_size, opt.sample_size), [99.4750, 107.7354, 114.7748],
+    # for i, crop in enumerate(pro_clip):
+    #     img = crop.transpose(1, 2, 0).astype(np.uint8)
+    #     cv2.imshow('img', clip[i])
+    #     cv2.imshow('img_2', img)
+    #     cv2.waitKey(0)
+    pro_clip = np.transpose(pro_clip, (1, 0, 2, 3))
             
+    
     
     # pro_clip = cv2.dnn.blobFromImages(clip, 1.0,
     #         (opt.sample_size, opt.sample_size), (0, 0, 0),
     #         swapRB=True, crop=True)
-    # img = pro_clip[0].transpose(1, 2, 0).astype(np.uint8)
-    # cv2.imshow('img', clip[0])
-    # cv2.imshow('img_2', img)
-    # cv2.waitKey(0)
+    # for i, crop in enumerate(pro_clip):
+    #     img = crop.transpose(1, 2, 0).astype(np.uint8)
+    #     cv2.imshow('img', clip[i])
+    #     cv2.imshow('img_2', img)
+    #     cv2.waitKey(0)
     # import pdb; pdb.set_trace()
-    pro_clip = np.transpose(pro_clip, (1, 0, 2, 3))
+    
+    # pro_clip = np.transpose(pro_clip, (1, 0, 2, 3))
 
     return pro_clip
 
@@ -330,6 +399,7 @@ class MICE_online(Dataset):
 
         for line in f:
             video_name, class_id = line.strip('\n').split(' #')
+            # video_path = os.path.join(self.opt.frame_dir, video_name)
             video_path = os.path.join(self.opt.frame_dir, video_name+'.mp4')
             if os.path.exists(video_path) == True:
                 self.data.append((video_path, class_id))

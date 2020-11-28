@@ -51,7 +51,7 @@ if __name__=="__main__":
         os.makedirs(result_path)    
 
     if opts.log:
-        f = open(os.path.join(result_path, "test_{}{}_{}_{}_{}_{}_online_{}.txt".format(opts.model, opts.model_depth, opts.dataset, opts.split, opts.modality, opts.sample_duration, opts.test_file)), 'w+')
+        f = open(os.path.join(result_path, "test_{}{}_{}_{}_{}_{}_online.txt".format(opts.model, opts.model_depth, opts.dataset, opts.split, opts.modality, opts.sample_duration)), 'w+')
         f.write(str(opts))
         f.write('\n')
         f.flush()
@@ -80,13 +80,16 @@ if __name__=="__main__":
             if opts.cuda:
                 inputs = inputs.cuda()
 
-            outputs_var = model(inputs)
+            outputs = model(inputs)
 
-            pred = np.array(torch.mean(outputs_var, dim=0, keepdim=True).topk(1)[1].cpu().data[0])
+            # pred = np.array(torch.mean(outputs_var, dim=0, keepdim=True).topk(1)[1].cpu().data[0])
+            # acc = float(pred[0] == targets[0])         
+            # accuracies.update(acc, 1)     
 
-            acc = float(pred[0] == targets[0])
-                            
-            accuracies.update(acc, 1)            
+            targets = targets.repeat(1, inputs.shape[0])
+            acc = calculate_accuracy(outputs, targets)
+
+            accuracies.update(acc, inputs.size(0))       
             
             line = "Video[" + str(i) + "] :  "  + "\t top1 = " + str(pred[0]) +  "\t true = " +str(int(targets[0])) + "\t video = " + str(accuracies.avg)
             print(line)

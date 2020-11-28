@@ -202,6 +202,41 @@ class MultiScaleCornerCrop(object):
 
         return img.resize((self.size, self.size), self.interpolation)
 
+
+class MultiScaleRandomCrop(object):
+    """Crop the given PIL.Image to randomly selected size.
+    A crop of size is selected from scales of the original size.
+    A position of cropping is randomly selected from 4 corners and 1 center.
+    This crop is finally resized to given size.
+    Args:
+        scales: cropping scales of the original size
+        size: size of the smaller edge
+        interpolation: Default: PIL.Image.BILINEAR
+    """
+
+    def __init__(self, scale, size, crop_position, interpolation=Image.BILINEAR):
+        self.scale = scale
+        self.size = size
+        self.interpolation = interpolation
+        self.crop_position = crop_position
+   
+    def __call__(self, img):
+        
+        # min_length = min(img.size[0], img.size[1])
+        min_length = 224
+        crop_size = int(min_length * self.scale)
+
+        random_loc = random.random()
+
+        x1 = int(32 * random_loc)
+        y1 = int(32 * random_loc)
+        x2 = x1 + crop_size
+        y2 = y1 + crop_size
+
+        img = img.crop((x1, y1, x2, y2))
+
+        return img.resize((self.size, self.size), self.interpolation)
+
 class Normalize(object):
     """Normalize an tensor image with mean and standard deviation.
     Given mean: (R, G, B) and std: (R, G, B),
@@ -254,7 +289,7 @@ def get_mean( dataset='HMDB51'):
     #assert dataset in ['activitynet', 'kinetics']
 
     if dataset == 'activitynet':
-        return [114.7748, 107.7354, 99.4750 ]
+        return [114.7748, 107.7354, 99.4750]
     elif dataset == 'kinetics':
     # Kinetics (10 videos for each class)
         return [110.63666788, 103.16065604,  96.29023126]
@@ -291,8 +326,6 @@ def scale_crop(clip, train, opt):
         processed_clip = torch.Tensor(3, len(clip), opt.sample_size, opt.sample_size)
     elif opt.modality == 'Flow':
         processed_clip = torch.Tensor(2, int(len(clip)/2), opt.sample_size, opt.sample_size)
-    elif opt.modality == 'RGB_Flow':
-        processed_clip = torch.Tensor(5, int(len(clip)/3), opt.sample_size, opt.sample_size)
     
     flip_prob     = random.random()
     scale_factor  = scale_choice[random.randint(0, len(scale_choice) - 1)]
@@ -317,27 +350,9 @@ def scale_crop(clip, train, opt):
                 elif i%2 == 1:
                     processed_clip[1, int((i-1)/2), :, :] = I
 
-            elif opt.modality == 'RGB_Flow':
-                if j == 1 and flip_prob<0.5:                # Flipping x-direction
-                    I = ImageChops.invert(I)
-                I = ToTensor(1)(I)                          
-                if j == 0:
-                    I = Normalize(get_mean('activitynet'), [1,1,1,])(I)
-                    processed_clip[0:3, int(i/3), :, :] = I
-                else:
-                    I = Normalize([127.5, 127.5, 127.5], [1,1,1])(I)
-                    if j == 1:
-                        processed_clip[3, int((i-1)/3), :, :] = I
-                    elif j == 2:
-                        processed_clip[4, int((i-2)/3), :, :] = I
-                j += 1
-                if j == 3:
-                    j = 0
-
     else:
         j = 0
         for i, I in enumerate(clip):
-            # I = Scale(256)(I)
             I = Scale(opt.sample_size)(I)
             I = CenterCrop(opt.sample_size)(I)
             I = ToTensor(1)(I)
@@ -352,19 +367,5 @@ def scale_crop(clip, train, opt):
                     processed_clip[0, int(i/2), :, :] = I
                 elif i%2 == 1:
                     processed_clip[1, int((i-1)/2), :, :] = I
-
-            elif opt.modality == 'RGB_Flow':
-                if j == 0:
-                    I = Normalize(get_mean('activitynet'), [1,1,1,])(I)
-                    processed_clip[0:3, int(i/3), :, :] = I
-                else:
-                    I = Normalize([127.5, 127.5, 127.5], [1,1,1])(I)                     
-                    if j == 1:
-                        processed_clip[3, int((i-1)/3), :, :] = I
-                    elif j == 2:
-                        processed_clip[4, int((i-2)/3), :, :] = I
-                j += 1
-                if j == 3:
-                    j = 0
                     
     return(processed_clip)

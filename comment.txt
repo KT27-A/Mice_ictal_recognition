@@ -6,48 +6,92 @@ CUDA_VISIBLE_DEVICES=0 python train.py --dataset MICE --modality RGB --split 1 -
 --frame_dir "../mice-1f" \
 --annotation_path "dataset/mice_labels" \
 --result_path "results_mice_resnext101/" \
---n_workers 0 --n_epochs 100
+--n_workers 0 --n_epochs 100 --train_file 'train_mice_1v1.txt' \
+--val_file 'test_mice.txt'
 
 -------------------------------train_single_resnext101_mice------------------------------------
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset MICE --modality RGB --split 1 --only_RGB \
+CUDA_VISIBLE_DEVICES=1 python train.py --dataset MICE --modality RGB --split 1 --only_RGB \
 --n_classes 400 --n_finetune_classes 2 \
 --batch_size 32 --log 1 --sample_duration 64 \
 --model resnext --model_depth 101 --ft_begin_index 4 \
---frame_dir "../mice-1f" \
+--frame_dir "../dataset/mice/mice_first_1f_256" \
 --annotation_path "dataset/mice_labels" \
 --pretrain_path "../pretrained_model/RGB_Kinetics_64f.pth" \
---result_path "results_mice_resnext101/" \
---n_workers 0 --n_epochs 100
+--result_path "results_mice_all_resnext101_1v1_test/" \
+--n_workers 2 --n_epochs 10 --train_file 'train_mice_1v1.txt' \
+--val_file 'test_mice_L04_case.txt' \
+--val_file_2 'test_mice_L04_control.txt' \
+--val_path '../dataset/mice/L04_1f_256'
 
-
--------------------------------test_single_resnext101_mice------------------------------------
-python test_plus_mice.py --batch_size 1 --n_classes 2 --model resnext --model_depth 101 \
---log 1 --dataset MICE --modality RGB --sample_duration 64 --split 1 --only_RGB  \
---resume_path1 "results_mice_resnext101/save_71_max.pth" \
---frame_dir "../mice_new-1f" \
+-------------------------------train_single_resnext101_mice_val_min------------------------------------
+CUDA_VISIBLE_DEVICES=1 python train_val_min.py --dataset MICE --modality RGB --split 1 --only_RGB \
+--n_classes 400 --n_finetune_classes 2 \
+--batch_size 32 --log 1 --sample_duration 64 \
+--model resnext --model_depth 101 --ft_begin_index 1 \
+--frame_dir "../dataset/mice/dataset_5_1f_256" \
 --annotation_path "dataset/mice_labels" \
---result_path "results_mice_resnext101/" \
---n_workers 0 --test_file 'test_mice_new.txt'
+--pretrain_path "../pretrained_model/RGB_Kinetics_64f.pth" \
+--result_path "results_d5_fn1_1015/" \
+--n_workers 8 --n_epochs 100 --train_file 'train_dataset_5.txt' \
+--val_file_1 'test_case_026_noin.txt' \
+--val_file_2 'test_control_026_0626_s_0.5.txt' \
+--val_path_1 '../dataset/mice/case_YJ_026_new_noin' \
+--val_path_2 '../dataset/mice/026_0626' 
 
+-------------------------------train_single_resnext101_mice_val_min_ratio_loss------------------------------------
+python train_val_min_ratio_loss.py --dataset MICE --modality RGB --split 1 --only_RGB \
+--n_classes 400 --n_finetune_classes 2 \
+--batch_size 32 --log 1 --sample_duration 64 \
+--model resnext --model_depth 101 --ft_begin_index 2 \
+--frame_dir "../dataset/mice/dataset_5_1f_256" \
+--annotation_path "dataset/mice_labels" \
+--pretrain_path "../pretrained_model/RGB_Kinetics_64f.pth" \
+--result_path "results_d5_lr_0.005/" \
+--n_workers 4 --n_epochs 100 --train_file 'train_dataset_5_new.txt' \
+--val_file_1 'test_case_026_noin.txt' \
+--val_file_2 'test_control_026_0626_s_0.5.txt' \
+--val_path_1 '../dataset/mice/case_YJ_026_new_noin' \
+--val_path_2 '../dataset/mice/026_0626'
 
--------------------------------test_single_resnext101_mice_online------------------------------------
-python test_plus_mice_online.py --batch_size 1 --n_classes 2 --model resnext --model_depth 101 \
+-------------------------------test_single_resnext101_mice_online_min------------------------------------
+CUDA_VISIBLE_DEVICES=1 python test_plus_mice_online_min.py --batch_size 1 --n_classes 2 --model resnext --model_depth 101 \
 --log 1 --dataset MICE_online --modality RGB --sample_duration 64 --split 1 --only_RGB  \
---resume_path1 "results_mice_resnext101_5/save_5_max.pth" \
---frame_dir "/home/katou2/github_home/0609_epilepsy/mice" \
+--resume_path1 "results_d5_no_focal_0915/save_44.pth" \
+--frame_dir "/media/alien/mice_seizure/mice/case_YJ_026_new_noin" \
+--annotation_path "dataset/mice_labels" \
+--result_path "results_d5_no_focal_0915_detect/" \
+--n_workers 0 --test_file 'test_case_026_noin.txt'
+
+
+-------------------------------test_single_resnext101_mice_online_single------------------------------------
+python test_plus_mice_online_single.py --batch_size 1 --n_classes 2 --model resnext --model_depth 101 \
+--log 1 --dataset MICE_online --modality RGB --sample_duration 64 --split 1 --only_RGB  \
+--resume_path1 "/home/katou2/github_home/MARS_my_start_0/results_mice_resnext101_5/save_5_max.pth" \
+--frame_dir "/home/katou2/github_home/0609_epilepsy/new_mice" \
 --annotation_path "dataset/mice_labels" \
 --result_path "results_mice_resnext101/" \
---n_workers 0 --test_file 'test_mice_case.txt'
+--n_workers 0 --test_file 'test_mice_new_control.txt'
+
+-------------------------------train_resume_resnext101_mice_val_min_ratio_loss------------------------------------
+CUDA_VISIBLE_DEVICES=0 python train_val_min_resume.py --dataset MICE --modality RGB --split 1 --only_RGB \
+--n_classes 2 --n_finetune_classes 2 \
+--batch_size 32 --log 1 --sample_duration 64 \
+--model resnext --model_depth 101 --ft_begin_index 2 \
+--frame_dir "../dataset/mice/dataset_5_1f_256" \
+--annotation_path "dataset/mice_labels" \
+--resume_path1 "results_d5_no_focal_0915/save_44.pth" \
+--result_path "results_d5_no_focal_0915_resume_1008/" \
+--n_workers 8 --n_epochs 100 --train_file 'train_dataset_5.txt' \
+--val_file_1 'test_case_026_noin.txt' \
+--val_file_2 'test_control_026_0626.txt' \
+--val_path_1 '../dataset/mice/case_YJ_026_new_noin' \
+--val_path_2 '../dataset/mice/026_0626'
 
 
 -------------------------------real_time_resnext101_mice------------------------------------
 python real_time_demo.py --n_classes 2 --model resnext --model_depth 101 \
 --sample_duration 64 --annotation_path "dataset/mice_labels" \
---resume_path1 "results_mice_resnext101_5/save_5_max.pth" \
+--resume_path1 "results_mice_resnext101/save_71_max.pth" \
 --inputs "./07_51-52.mp4" \
-
-
-
-
 
 

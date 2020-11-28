@@ -36,7 +36,7 @@ def parse_opts():
         help='(3, 2)')
     parser.add_argument(
         '--n_classes',
-        default=400,
+        default=2,
         type=int,
         help='Number of classes (activitynet: 200, kinetics: 400, ucf101: 101, hmdb51: 51)')
     parser.add_argument(
@@ -117,7 +117,7 @@ def parse_opts():
     # optimizer parameters
     parser.add_argument(
         '--learning_rate',
-        default=0.1,
+        default=0.001,
         type=float,
         help='Initial learning rate (divided by 10 while training by lr scheduler)')
     parser.add_argument(
@@ -132,7 +132,7 @@ def parse_opts():
         help='dampening of SGD')
     parser.add_argument(
         '--weight_decay', 
-        default=1e-3, 
+        default=1e-5, 
         type=float, 
         help='Weight Decay')
     parser.add_argument(
@@ -235,10 +235,35 @@ def parse_opts():
         type=str,
         help='inputs video for real time show')
     parser.add_argument(
+        '--train_file',
+        default='',
+        type=str,
+        help='file name of train file')
+    parser.add_argument(
         '--test_file',
         default='',
         type=str,
         help='file name of test file')
+    parser.add_argument(
+        '--val_file_1',
+        default='',
+        type=str,
+        help='file name of val file')
+    parser.add_argument(
+        '--val_file_2',
+        default='',
+        type=str,
+        help='file name of val file')
+    parser.add_argument(
+        '--val_path_1',
+        default='',
+        type=str,
+        help='path of val file')
+    parser.add_argument(
+        '--val_path_2',
+        default='',
+        type=str,
+        help='path of val file')
     parser.set_defaults(nesterov=False)
 
     args = parser.parse_args()

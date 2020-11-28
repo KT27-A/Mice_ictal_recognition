@@ -43,7 +43,7 @@ def get_test_video_online(opt, video_path):
     
     pro_clip = cv2.dnn.blobFromImages(clip, 1.0,
             (opt.sample_size, opt.sample_size), (114.7748, 107.7354, 99.4750),
-            swapRB=True, crop=True)
+            swapRB=True, crop=False)
     pro_clip = np.transpose(pro_clip, (1, 0, 2, 3))
 
     return pro_clip
@@ -215,16 +215,30 @@ class MICE(Dataset):
         self.data = []        # (filename , lab_id)
         if self.train_val_test == 0:
             filenames = opt.test_file
+            frame_dir = opt.frame_dir
         elif self.train_val_test == 1:
-            filenames = 'train_mice.txt'
+            filenames = opt.train_file
+            frame_dir = opt.frame_dir
         elif self.train_val_test == 2:
-            filenames = 'test_mice.txt'
+            filenames = opt.val_file_1
+            frame_dir = opt.val_path_1
+        elif self.train_val_test == 3:
+            filenames = opt.val_file_2
+            frame_dir = opt.val_path_2
+
 
         f = open(os.path.join(self.opt.annotation_path, filenames), 'r')
 
+        # for line in f:
+        #     video_name, class_id = line.strip('\n').split(' #')
+        #     video_path = os.path.join(self.opt.frame_dir, video_name)
+        #     if os.path.exists(video_path) == True:
+        #         self.data.append((video_path, class_id))
+        #     else:
+        #         print('ERROR no such video name {}'.format(video_name))
         for line in f:
             video_name, class_id = line.strip('\n').split(' #')
-            video_path = os.path.join(self.opt.frame_dir, video_name)
+            video_path = os.path.join(frame_dir, video_name)
             if os.path.exists(video_path) == True:
                 self.data.append((video_path, class_id))
             else:
@@ -247,7 +261,7 @@ class MICE(Dataset):
         else:
             clip = get_train_video(self.opt, frame_path, Total_frames)
                     
-        return((scale_crop(clip, self.train_val_test, self.opt), label_id))
+        return scale_crop(clip, self.train_val_test, self.opt), label_id
 
 
 class MICE_online(Dataset):
@@ -280,9 +294,9 @@ class MICE_online(Dataset):
         if self.train_val_test == 0:
             filenames = opt.test_file
         elif self.train_val_test == 1:
-            filenames = 'train_mice.txt'
+            filenames = opt.train_file
         elif self.train_val_test == 2:
-            filenames = 'test_mice.txt'
+            filenames = opt.val_file
 
         f = open(os.path.join(self.opt.annotation_path, filenames), 'r')
 

@@ -24,13 +24,21 @@ def generate_model(opt):
     if opt.pretrain_path:
         print('loading pretrained model {}'.format(opt.pretrain_path))
         pretrain = torch.load(opt.pretrain_path)
-        
         assert opt.arch == pretrain['arch']
         model.load_state_dict(pretrain['state_dict'])
         model.module.fc = nn.Linear(model.module.fc.in_features, opt.n_finetune_classes)
         model.module.fc = model.module.fc.cuda()
 
         parameters = get_fine_tuning_parameters(model, opt.ft_begin_index)
+        return model, parameters
+
+    elif opt.resume_path1:
+        pretrain = torch.load(opt.resume_path1)
+        assert opt.arch == pretrain['arch']
+        
+        model.load_state_dict(pretrain['state_dict'])
+        parameters = get_fine_tuning_parameters(model, opt.ft_begin_index)
+
         return model, parameters
 
 
